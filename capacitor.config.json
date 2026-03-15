@@ -1,7 +1,7 @@
 {
   "appId": "com.biblecompare.app",
   "appName": "Bible Compare",
-  "webDir": ".",
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   }
