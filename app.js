@@ -1,10 +1,46 @@
 import { TRANSLATIONS, getTranslations, getChapterCount, getVerses, getVerse, preload } from './db.js';
-import { t } from './i18n.js';
+import { t, getLocale } from './i18n.js';
 
 // Determine text direction for a translation + book index
 function getDir(tId, bookIndex) {
   if (tId === 'original' && bookIndex <= 38) return 'rtl'; // Hebrew OT
   return 'ltr';
+}
+
+// --- Theme ---
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+  }
+  updateThemeIcon();
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  themeBtn.textContent = isDark ? '\u2600\uFE0F' : '\uD83C\uDF19';
+}
+
+// --- Locale-based defaults ---
+
+function getDefaults() {
+  const isHu = getLocale() === 'hu';
+  return {
+    activeTranslations: isHu ? ['hunkar', 'kjv'] : ['kjv', 'hunkar'],
+    activeTab: isHu ? 'hunkar' : 'kjv',
+  };
 }
 
 const $ = (sel) => document.querySelector(sel);
@@ -22,17 +58,22 @@ const versionClose = $('#version-close');
 const prevBtn = $('#prev-btn');
 const nextBtn = $('#next-btn');
 const pagingLabel = $('#paging-label');
+const themeBtn = $('#theme-btn');
 
-let activeTranslations = new Set(['kjv', 'hunkar']);
-let activeTab = 'kjv';
+const defaults = getDefaults();
+let activeTranslations = new Set(defaults.activeTranslations);
+let activeTab = defaults.activeTab;
 let currentBook = 0;
 let currentChapter = 1;
 let currentVerse = 1;
-let topVersePerTab = {}; // tracks scroll position per tab
+let topVersePerTab = {};
 
 // --- Initialization ---
 
 async function init() {
+  initTheme();
+  themeBtn.addEventListener('click', toggleTheme);
+
   // Apply static UI translations
   document.title = t('appTitle');
   $('.app-title').textContent = t('appTitle');
