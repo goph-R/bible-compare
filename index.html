@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Compare</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="hidden">
+    <div class="spinner"></div>
+    <div id="loading-text">Loading...</div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="app-title">Bible Compare</div>
+    <div class="nav-controls">
+      <div class="version-picker">
+        <button id="version-btn" class="version-btn" aria-label="Select versions">&#x1F4D6;</button>
+        <div id="version-popup" class="version-popup hidden">
+          <div id="version-list" class="version-list"></div>
+          <button id="version-close" class="version-close">Close</button>
+        </div>
+      </div>
+      <select id="book-select" aria-label="Book"></select>
+      <select id="chapter-select" aria-label="Chapter"></select>
+      <select id="verse-select" aria-label="Verse"></select>
+    </div>
+  </header>
+
+  <!-- Translation Tabs -->
+  <nav id="tab-bar" class="tab-bar"></nav>
+
+  <!-- Content Panel (single translation at a time) -->
+  <main id="content-panel" class="content-panel">
+    <p class="empty-message">Loading...</p>
+  </main>
+
+  <!-- Paging Buttons -->
+  <footer class="paging-bar">
+    <button id="prev-btn" class="paging-btn">&larr; Previous</button>
+    <span id="paging-label" class="paging-label"></span>
+    <button id="next-btn" class="paging-btn">Next &rarr;</button>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
