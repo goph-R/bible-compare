@@ -37,7 +37,7 @@ npx serve .
 ### Android
 ```bash
 mkdir -p www && cp index.html app.js db.js i18n.js styles.css sw.js www/ && cp -r data www/
-export ANDROID_SDK_ROOT="C:/Users/gopher/Apps/AndroidSDK"
+export ANDROID_SDK_ROOT="C:/Users/gopher/AppData/Local/Android/Sdk"
 export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
 npx cap sync android
 cd android && ./gradlew assembleDebug
