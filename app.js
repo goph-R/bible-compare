@@ -1,5 +1,6 @@
-import { TRANSLATIONS, getTranslations, getChapterCount, getVerses, getVerse, preload } from './db.js';
+import { TRANSLATIONS, getTranslations, getChapterCount, getVerses, getVerse, preload, loadTranslation } from './db.js';
 import { t, getLocale } from './i18n.js';
+import { searchTranslation } from './search.js';
 
 // Determine text direction for a translation + book index
 function getDir(tId, bookIndex) {
@@ -59,6 +60,17 @@ const prevBtn = $('#prev-btn');
 const nextBtn = $('#next-btn');
 const pagingLabel = $('#paging-label');
 const themeBtn = $('#theme-btn');
+const searchBtn = $('#search-btn');
+const searchOverlay = $('#search-overlay');
+const searchInput = $('#search-input');
+const searchGoBtn = $('#search-go');
+const searchCloseBtn = $('#search-close-btn');
+const searchResultsEl = $('#search-results');
+const searchStatus = $('#search-status');
+const searchPaging = $('#search-paging');
+const searchPrevBtn = $('#search-prev');
+const searchNextBtn = $('#search-next');
+const searchPagingLabel = $('#search-paging-label');
 
 const defaults = getDefaults();
 let activeTranslations = new Set(defaults.activeTranslations);
@@ -67,6 +79,10 @@ let currentBook = 0;
 let currentChapter = 1;
 let currentVerse = 1;
 let topVersePerTab = {};
+let searchResultsData = [];
+let searchPage = 0;
+let lastSearchQuery = '';
+const SEARCH_PAGE_SIZE = 20;
 
 // --- Initialization ---
 
@@ -81,6 +97,7 @@ async function init() {
   chapterSelect.setAttribute('aria-label', t('chapter'));
   verseSelect.setAttribute('aria-label', t('verse'));
   versionBtn.setAttribute('aria-label', t('selectVersions'));
+  searchBtn.setAttribute('aria-label', t('search'));
   versionClose.textContent = t('close');
   prevBtn.innerHTML = t('previous');
   nextBtn.innerHTML = t('next');
@@ -105,6 +122,19 @@ async function init() {
   prevBtn.addEventListener('click', goBack);
   nextBtn.addEventListener('click', goForward);
   window.addEventListener('hashchange', readHash);
+
+  // Search
+  searchBtn.addEventListener('click', openSearch);
+  searchCloseBtn.addEventListener('click', closeSearch);
+  searchGoBtn.addEventListener('click', executeSearch);
+  searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') executeSearch(); });
+  searchPrevBtn.addEventListener('click', () => { searchPage--; renderSearchResults(); });
+  searchNextBtn.addEventListener('click', () => { searchPage++; renderSearchResults(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) {
+      closeSearch();
+    }
+  });
 
   await onBookChange();
 }
@@ -378,6 +408,162 @@ function readHash() {
     activeTab = params.get('tab');
   }
   updateTabVisibility();
+}
+
+// --- Search ---
+
+function openSearch() {
+  searchOverlay.classList.remove('hidden');
+  searchInput.placeholder = t('searchPlaceholder', TRANSLATIONS[activeTab].name);
+  searchInput.value = '';
+  searchResultsEl.innerHTML = '';
+  searchStatus.textContent = '';
+  searchPaging.classList.add('hidden');
+  searchInput.focus();
+}
+
+function closeSearch() {
+  searchOverlay.classList.add('hidden');
+}
+
+async function executeSearch() {
+  const query = searchInput.value.trim();
+  if (query.length < 2) {
+    searchStatus.textContent = t('searchMinChars');
+    searchResultsEl.innerHTML = '';
+    searchPaging.classList.add('hidden');
+    return;
+  }
+  const data = await loadTranslation(activeTab);
+  searchResultsData = searchTranslation(data, query, t('books'));
+  searchPage = 0;
+  lastSearchQuery = query;
+  renderSearchResults();
+}
+
+function highlightMatch(text, query) {
+  // Fold diacritics for matching positions, but preserve original text
+  const foldedText = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const foldedQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const parts = [];
+  let lastEnd = 0;
+  let pos = foldedText.indexOf(foldedQuery);
+
+  // Map folded positions back to original text positions
+  // Build a mapping: original index -> folded index
+  const orig = text;
+  const norm = text.normalize('NFD');
+  // Map from normalized index to original index
+  const normToOrig = [];
+  let oi = 0;
+  for (let ni = 0; ni < norm.length; ni++) {
+    // Combining marks (0300-036f) were stripped in folded, skip them
+    const code = norm.charCodeAt(ni);
+    if (code >= 0x0300 && code <= 0x036f) {
+      normToOrig.push(normToOrig[ni - 1]); // same original char
+    } else {
+      normToOrig.push(oi);
+      oi++;
+    }
+  }
+  // Build folded-index to original-index mapping
+  // foldedText = norm stripped of combining marks, lowercased
+  // We need: for each index in foldedText, what's the original text index?
+  const foldedToOrig = [];
+  for (let ni = 0; ni < norm.length; ni++) {
+    const code = norm.charCodeAt(ni);
+    if (!(code >= 0x0300 && code <= 0x036f)) {
+      foldedToOrig.push(normToOrig[ni]);
+    }
+  }
+
+  while (pos !== -1) {
+    const origStart = foldedToOrig[pos];
+    const origEnd = pos + foldedQuery.length < foldedToOrig.length
+      ? foldedToOrig[pos + foldedQuery.length]
+      : orig.length;
+
+    if (origStart > lastEnd) {
+      parts.push(escapeHtml(orig.slice(lastEnd, origStart)));
+    }
+    parts.push(`<mark>${escapeHtml(orig.slice(origStart, origEnd))}</mark>`);
+    lastEnd = origEnd;
+    pos = foldedText.indexOf(foldedQuery, pos + foldedQuery.length);
+  }
+  if (lastEnd < orig.length) {
+    parts.push(escapeHtml(orig.slice(lastEnd)));
+  }
+  return parts.join('');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderSearchResults() {
+  const total = searchResultsData.length;
+  if (total === 0) {
+    searchStatus.textContent = t('searchNoResults');
+    searchResultsEl.innerHTML = '';
+    searchPaging.classList.add('hidden');
+    return;
+  }
+
+  searchStatus.textContent = t('searchResults', total);
+  const totalPages = Math.ceil(total / SEARCH_PAGE_SIZE);
+  const start = searchPage * SEARCH_PAGE_SIZE;
+  const pageResults = searchResultsData.slice(start, start + SEARCH_PAGE_SIZE);
+
+  searchResultsEl.innerHTML = pageResults.map((r, i) => `
+    <div class="search-result-item" data-idx="${start + i}">
+      <div class="search-result-ref">${escapeHtml(r.ref)}</div>
+      <div class="search-result-text">${highlightMatch(r.text, lastSearchQuery)}</div>
+    </div>
+  `).join('');
+
+  searchResultsEl.querySelectorAll('.search-result-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const idx = parseInt(item.dataset.idx);
+      navigateToResult(searchResultsData[idx]);
+    });
+  });
+
+  if (totalPages > 1) {
+    searchPaging.classList.remove('hidden');
+    searchPagingLabel.textContent = t('searchPageOf', searchPage + 1, totalPages);
+    searchPrevBtn.disabled = searchPage === 0;
+    searchNextBtn.disabled = searchPage >= totalPages - 1;
+  } else {
+    searchPaging.classList.add('hidden');
+  }
+
+  searchResultsEl.scrollTop = 0;
+}
+
+async function navigateToResult(result) {
+  closeSearch();
+  currentBook = result.bookIndex;
+  bookSelect.value = currentBook;
+
+  // Populate chapter select without resetting
+  const firstT = [...activeTranslations][0] || 'kjv';
+  const count = await getChapterCount(firstT, currentBook);
+  chapterSelect.innerHTML = Array.from({ length: count }, (_, i) =>
+    `<option value="${i + 1}">${i + 1}</option>`
+  ).join('');
+  currentChapter = result.chapter;
+  chapterSelect.value = currentChapter;
+
+  // Populate verse select without resetting
+  const verses = await getVerses(firstT, currentBook, currentChapter);
+  verseSelect.innerHTML = verses.map(v =>
+    `<option value="${v.verse}">${v.verse}</option>`
+  ).join('');
+  currentVerse = result.verse;
+  verseSelect.value = currentVerse;
+
+  topVersePerTab = {};
+  await renderContent();
 }
 
 // --- Service Worker ---

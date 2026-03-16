@@ -25,12 +25,17 @@
           <button id="version-close" class="version-close">Close</button>
         </div>
       </div>
-      <select id="book-select" aria-label="Book"></select>
-      <select id="chapter-select" aria-label="Chapter"></select>
-      <select id="verse-select" aria-label="Verse"></select>
     </div>
     <button id="theme-btn" class="theme-btn" aria-label="Toggle theme"></button>
+    <button id="search-btn" class="search-btn" aria-label="Search">&#x1F50D;</button>
   </header>
+
+  <!-- Book / Chapter / Verse selectors -->
+  <div class="nav-selects">
+    <select id="book-select" aria-label="Book"></select>
+    <select id="chapter-select" aria-label="Chapter"></select>
+    <select id="verse-select" aria-label="Verse"></select>
+  </div>
 
   <!-- Translation Tabs -->
   <nav id="tab-bar" class="tab-bar"></nav>
@@ -46,6 +51,24 @@
     <span id="paging-label" class="paging-label"></span>
     <button id="next-btn" class="paging-btn">Next &rarr;</button>
   </footer>
+
+  <!-- Search Overlay -->
+  <div id="search-overlay" class="search-overlay hidden">
+    <div class="search-container">
+      <div class="search-header">
+        <input type="text" id="search-input" class="search-input" placeholder="Search..." autocomplete="off">
+        <button id="search-go" class="search-go-btn">&#x1F50D;</button>
+        <button id="search-close-btn" class="search-close-btn">&times;</button>
+      </div>
+      <div id="search-status" class="search-status"></div>
+      <div id="search-results" class="search-results"></div>
+      <div id="search-paging" class="search-paging hidden">
+        <button id="search-prev" class="paging-btn">&larr; Previous</button>
+        <span id="search-paging-label" class="paging-label"></span>
+        <button id="search-next" class="paging-btn">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-compare-v3';
+const CACHE_NAME = 'bible-compare-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   './db.js',
   './i18n.js',
   './styles.css',
+  './search.js',
   './data/kjv.json',
   './data/bbe.json',
   './data/hunkar.json',
