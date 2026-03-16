@@ -1,0 +1,11 @@
+# No caching for the service worker so browsers always check for updates
+<Files "sw.js">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+</Files>
+
+# Cache static assets for 1 week (they're versioned via the SW cache name)
+<FilesMatch "\.(js|css|html|json)$">
+  Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
+
+# sw.js rule above takes precedence since it's more specific
