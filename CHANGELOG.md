@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.2] - 2026-03-16
+
+### Fixed
+- Content no longer draws behind Android status bar and navigation buttons
+- Added CSS safe area insets for header and paging bar
+
+### Changed
+- Android package name set to `net.dynart.bible`
+- Target Android API 35 (required by Google Play)
+- Custom app icon
+
+## [0.9.1] - 2026-03-16
+
+### Changed
+- Target Android API 35
+- Removed unused `lib/` folder (vendored sql-wasm)
+
 ## [0.9.0] - 2026-03-16
 
 ### Added
@@ -15,7 +32,5 @@
 - **Android build** — Capacitor.js configuration for native Android APK/AAB
 
 ### Missing for 1.0.0
-- App icon
-- App description / meta tags
 - Screenshots for README
 - iOS build (untested)

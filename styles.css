@@ -89,7 +89,7 @@ body {
 .app-header {
   background: var(--header-bg);
   color: var(--header-text);
-  padding: 12px 20px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -355,7 +355,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
+  padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
   background: var(--surface);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
