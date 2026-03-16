@@ -7,6 +7,8 @@ An offline Bible verse comparison app built with vanilla JS/HTML/CSS. Browse and
 - **Tabbed translation view** — switch between translations, verse position is preserved across tabs
 - **4 bundled translations** — KJV, BBE (Bible in Basic English), Karoli (Hungarian), Original (Hebrew OT + Greek NT)
 - **Full chapter reading** with clickable verse highlighting
+- **Full-text search** — accent-insensitive search within the active translation with highlighted results and paging
+- **Bookmarks** — save favourite verses with a star button, browse and navigate from a bookmarks overlay, persisted in localStorage
 - **Previous/Next chapter paging** at the bottom of the view
 - **Version picker** — toggle translations on/off via the book icon button
 - **Dark/light theme** — follows system preference, toggleable with the sun/moon button, persisted in localStorage
@@ -23,6 +25,7 @@ bible-compare/
   app.js                  # UI logic, event handlers, rendering, theme
   db.js                   # Data layer: loads JSON, provides query methods
   i18n.js                 # Internationalization (EN/HU)
+  search.js               # Full-text search with accent folding
   styles.css              # Responsive layout with dark/light theme
   sw.js                   # Service worker for offline web
   data/
@@ -31,9 +34,6 @@ bible-compare/
     hunkar.json           # Karoli Gaspar (1590)
     hebrew.json           # Hebrew (Modern) — used for OT in "Original"
     greek.json            # Greek (Byzantine) — used for NT in "Original"
-  lib/
-    sql-wasm.js           # Vendored sql.js (reserved for future use)
-    sql-wasm.wasm
   capacitor.config.json   # Capacitor configuration
   package.json            # Dependencies (Capacitor only)
 ```
@@ -98,7 +98,7 @@ npm install
 # Copy web files to the Capacitor web directory
 mkdir -p www
 cp index.html app.js db.js i18n.js styles.css sw.js www/
-cp -r data lib www/
+cp -r data www/
 
 # Add Android platform (first time only)
 npx cap add android
@@ -151,7 +151,7 @@ npm install
 # Prepare web files
 mkdir -p www
 cp index.html app.js db.js i18n.js styles.css sw.js www/
-cp -r data lib www/
+cp -r data www/
 
 # Add iOS platform (first time only)
 npm install @capacitor/ios

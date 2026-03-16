@@ -13,10 +13,10 @@ Offline Bible verse comparison app. Vanilla JS/HTML/CSS, no framework, no build 
 - `app.js` — UI logic, event handlers, rendering, theme toggle
 - `db.js` — Data layer: lazy-loads translation JSON, caching, query methods. `TRANSLATIONS` object is the registry
 - `i18n.js` — Internationalization. `t('key')` for all UI strings. Currently EN + HU
+- `search.js` — Full-text search with accent-insensitive matching
 - `styles.css` — All styling, dark/light via `[data-theme]` and CSS custom properties
 - `sw.js` — Service worker, bump `CACHE_NAME` version when assets change
 - `data/` — Translation JSON files (~11MB each)
-- `lib/` — Vendored sql-wasm (not currently used, reserved)
 - `www/` — Generated: copy of web files for Capacitor (gitignored)
 - `android/` — Generated: Capacitor Android project (gitignored)
 
@@ -36,7 +36,7 @@ npx serve .
 
 ### Android
 ```bash
-mkdir -p www && cp index.html app.js db.js i18n.js styles.css sw.js www/ && cp -r data lib www/
+mkdir -p www && cp index.html app.js db.js i18n.js styles.css sw.js www/ && cp -r data www/
 export ANDROID_SDK_ROOT="C:/Users/gopher/Apps/AndroidSDK"
 export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
 npx cap sync android
