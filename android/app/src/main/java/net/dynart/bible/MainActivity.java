@@ -1,11 +1,10 @@
 package net.dynart.bible;
 
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
 import com.getcapacitor.BridgeActivity;
@@ -15,14 +14,11 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Window window = getWindow();
-        // Try to opt out of edge-to-edge
-        WindowCompat.setDecorFitsSystemWindows(window, true);
-        // Set opaque system bar backgrounds so content doesn't show through
-        window.setStatusBarColor(Color.parseColor("#3b3f4a"));
-        window.setNavigationBarColor(Color.parseColor("#3b3f4a"));
+        // Set the window background so the area behind transparent system bars
+        // matches the app header color instead of showing white/black
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#3b3f4a")));
 
-        // Apply padding for system bar insets as a safety net
+        // Apply padding for system bar insets so content is not behind system bars
         View content = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
