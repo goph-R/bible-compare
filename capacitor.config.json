@@ -1,5 +1,5 @@
 {
-  "appId": "com.biblecompare.app",
+  "appId": "net.dynart.bible",
   "appName": "Bible Compare",
   "webDir": "www",
   "server": {

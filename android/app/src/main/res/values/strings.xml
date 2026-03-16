@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bible Compare</string>
+    <string name="title_activity_main">Bible Compare</string>
+    <string name="package_name">net.dynart.bible</string>
+    <string name="custom_url_scheme">net.dynart.bible</string>
+</resources>
