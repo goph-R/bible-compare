@@ -71,6 +71,12 @@ const searchPaging = $('#search-paging');
 const searchPrevBtn = $('#search-prev');
 const searchNextBtn = $('#search-next');
 const searchPagingLabel = $('#search-paging-label');
+const bookmarksBtn = $('#bookmarks-btn');
+const bookmarksOverlay = $('#bookmarks-overlay');
+const bookmarksCloseBtn = $('#bookmarks-close-btn');
+const bookmarksList = $('#bookmarks-list');
+const bookmarksTitle = $('#bookmarks-title');
+const bookmarkStar = $('#bookmark-star');
 
 const defaults = getDefaults();
 let activeTranslations = new Set(defaults.activeTranslations);
@@ -83,6 +89,7 @@ let searchResultsData = [];
 let searchPage = 0;
 let lastSearchQuery = '';
 const SEARCH_PAGE_SIZE = 20;
+let bookmarks = loadBookmarks();
 
 // --- Initialization ---
 
@@ -123,6 +130,13 @@ async function init() {
   nextBtn.addEventListener('click', goForward);
   window.addEventListener('hashchange', readHash);
 
+  // Bookmarks
+  bookmarksBtn.setAttribute('aria-label', t('bookmarks'));
+  bookmarksTitle.textContent = t('bookmarks');
+  bookmarksBtn.addEventListener('click', openBookmarks);
+  bookmarksCloseBtn.addEventListener('click', closeBookmarks);
+  bookmarkStar.addEventListener('click', toggleBookmark);
+
   // Search
   searchBtn.addEventListener('click', openSearch);
   searchCloseBtn.addEventListener('click', closeSearch);
@@ -131,8 +145,12 @@ async function init() {
   searchPrevBtn.addEventListener('click', () => { searchPage--; renderSearchResults(); });
   searchNextBtn.addEventListener('click', () => { searchPage++; renderSearchResults(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) {
-      closeSearch();
+    if (e.key === 'Escape') {
+      if (!bookmarksOverlay.classList.contains('hidden')) {
+        closeBookmarks();
+      } else if (!searchOverlay.classList.contains('hidden')) {
+        closeSearch();
+      }
     }
   });
 
@@ -324,10 +342,12 @@ async function renderContent() {
     currentVerse = v;
     verseSelect.value = v;
     updateHash();
+    updateBookmarkStar();
   });
 
   restoreScrollPosition();
   updatePaging();
+  updateBookmarkStar();
 }
 
 // --- Paging ---
@@ -560,6 +580,123 @@ async function navigateToResult(result) {
     `<option value="${v.verse}">${v.verse}</option>`
   ).join('');
   currentVerse = result.verse;
+  verseSelect.value = currentVerse;
+
+  topVersePerTab = {};
+  await renderContent();
+}
+
+// --- Bookmarks ---
+
+function loadBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem('bookmarks')) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveBookmarks() {
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+}
+
+function isBookmarked(bookIndex, chapter, verse) {
+  return bookmarks.some(bm => bm.bookIndex === bookIndex && bm.chapter === chapter && bm.verse === verse);
+}
+
+function toggleBookmark() {
+  const idx = bookmarks.findIndex(bm => bm.bookIndex === currentBook && bm.chapter === currentChapter && bm.verse === currentVerse);
+  if (idx >= 0) {
+    bookmarks.splice(idx, 1);
+  } else {
+    const books = t('books');
+    bookmarks.push({
+      bookIndex: currentBook,
+      chapter: currentChapter,
+      verse: currentVerse,
+      tab: activeTab,
+      label: `${books[currentBook]} ${currentChapter}:${currentVerse}`
+    });
+  }
+  saveBookmarks();
+  updateBookmarkStar();
+}
+
+function updateBookmarkStar() {
+  const active = isBookmarked(currentBook, currentChapter, currentVerse);
+  bookmarkStar.textContent = active ? '\u2605' : '\u2606';
+  bookmarkStar.classList.toggle('active', active);
+}
+
+function openBookmarks() {
+  bookmarksOverlay.classList.remove('hidden');
+  renderBookmarksList();
+}
+
+function closeBookmarks() {
+  bookmarksOverlay.classList.add('hidden');
+}
+
+function renderBookmarksList() {
+  if (bookmarks.length === 0) {
+    bookmarksList.innerHTML = `<p class="bookmarks-empty">${t('noBookmarks')}</p>`;
+    return;
+  }
+  // Sort by canonical order
+  const sorted = [...bookmarks].sort((a, b) => a.bookIndex - b.bookIndex || a.chapter - b.chapter || a.verse - b.verse);
+  bookmarksList.innerHTML = sorted.map((bm, i) => `
+    <div class="bookmark-item" data-idx="${bookmarks.indexOf(bm)}">
+      <span class="bookmark-label">${escapeHtml(bm.label)}</span>
+      <button class="bookmark-delete" data-delete="${bookmarks.indexOf(bm)}">&times;</button>
+    </div>
+  `).join('');
+
+  bookmarksList.querySelectorAll('.bookmark-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.bookmark-delete')) {
+        const delIdx = parseInt(e.target.closest('.bookmark-delete').dataset.delete);
+        deleteBookmark(delIdx);
+        return;
+      }
+      const idx = parseInt(item.dataset.idx);
+      navigateToBookmark(bookmarks[idx]);
+    });
+  });
+}
+
+function deleteBookmark(idx) {
+  if (!confirm(t('confirmDeleteBookmark', bookmarks[idx].label))) return;
+  bookmarks.splice(idx, 1);
+  saveBookmarks();
+  renderBookmarksList();
+  updateBookmarkStar();
+}
+
+async function navigateToBookmark(bm) {
+  closeBookmarks();
+
+  // Switch to the bookmarked tab if it's active
+  if (activeTranslations.has(bm.tab)) {
+    activeTab = bm.tab;
+    updateTabVisibility();
+  }
+
+  currentBook = bm.bookIndex;
+  bookSelect.value = currentBook;
+
+  const firstT = [...activeTranslations][0] || 'kjv';
+  const count = await getChapterCount(firstT, currentBook);
+  chapterSelect.innerHTML = Array.from({ length: count }, (_, i) =>
+    `<option value="${i + 1}">${i + 1}</option>`
+  ).join('');
+  currentChapter = bm.chapter;
+  chapterSelect.value = currentChapter;
+
+  const verses = await getVerses(firstT, currentBook, currentChapter);
+  verseSelect.innerHTML = verses.map(v =>
+    `<option value="${v.verse}">${v.verse}</option>`
+  ).join('');
+  currentVerse = bm.verse;
   verseSelect.value = currentVerse;
 
   topVersePerTab = {};

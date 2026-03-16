@@ -21,6 +21,11 @@ const STRINGS = {
     searchNoResults: 'No results found.',
     searchPageOf: (page, total) => `Page ${page} / ${total}`,
     searchMinChars: 'Enter at least 2 characters.',
+    bookmarks: 'Bookmarks',
+    noBookmarks: 'No bookmarks yet.',
+    bookmarkAdded: 'Bookmark added.',
+    bookmarkRemoved: 'Bookmark removed.',
+    confirmDeleteBookmark: (label) => `Remove bookmark for ${label}?`,
     books: [
       'Genesis','Exodus','Leviticus','Numbers','Deuteronomy',
       'Joshua','Judges','Ruth','1 Samuel','2 Samuel',
@@ -59,6 +64,11 @@ const STRINGS = {
     searchNoResults: 'Nincs tal\u00e1lat.',
     searchPageOf: (page, total) => `${page}. / ${total} oldal`,
     searchMinChars: 'Legal\u00e1bb 2 karaktert adj meg.',
+    bookmarks: 'K\u00f6nyvjelz\u0151k',
+    noBookmarks: 'Nincsenek k\u00f6nyvjelz\u0151k.',
+    bookmarkAdded: 'K\u00f6nyvjelz\u0151 hozz\u00e1adva.',
+    bookmarkRemoved: 'K\u00f6nyvjelz\u0151 elt\u00e1vol\u00edtva.',
+    confirmDeleteBookmark: (label) => `T\u00f6r\u00f6lj\u00fck a k\u00f6nyvjelz\u0151t: ${label}?`,
     books: [
       '1 M\u00f3zes','2 M\u00f3zes','3 M\u00f3zes','4 M\u00f3zes','5 M\u00f3zes',
       'J\u00f3zsu\u00e9','B\u00edr\u00e1k','Ruth','1 S\u00e1muel','2 S\u00e1muel',

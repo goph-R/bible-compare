@@ -27,6 +27,7 @@
       </div>
     </div>
     <button id="theme-btn" class="theme-btn" aria-label="Toggle theme"></button>
+    <button id="bookmarks-btn" class="bookmarks-btn" aria-label="Bookmarks">&#x1F516;</button>
     <button id="search-btn" class="search-btn" aria-label="Search">&#x1F50D;</button>
   </header>
 
@@ -35,6 +36,7 @@
     <select id="book-select" aria-label="Book"></select>
     <select id="chapter-select" aria-label="Chapter"></select>
     <select id="verse-select" aria-label="Verse"></select>
+    <button id="bookmark-star" class="bookmark-star" aria-label="Toggle bookmark">&#x2606;</button>
   </div>
 
   <!-- Translation Tabs -->
@@ -51,6 +53,17 @@
     <span id="paging-label" class="paging-label"></span>
     <button id="next-btn" class="paging-btn">Next &rarr;</button>
   </footer>
+
+  <!-- Bookmarks Overlay -->
+  <div id="bookmarks-overlay" class="bookmarks-overlay hidden">
+    <div class="bookmarks-container">
+      <div class="bookmarks-header">
+        <h2 id="bookmarks-title" class="bookmarks-title">Bookmarks</h2>
+        <button id="bookmarks-close-btn" class="search-close-btn">&times;</button>
+      </div>
+      <div id="bookmarks-list" class="bookmarks-list"></div>
+    </div>
+  </div>
 
   <!-- Search Overlay -->
   <div id="search-overlay" class="search-overlay hidden">

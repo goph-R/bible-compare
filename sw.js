@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-compare-v4';
+const CACHE_NAME = 'bible-compare-v5';
 const ASSETS = [
   './',
   './index.html',

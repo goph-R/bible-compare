@@ -148,6 +148,7 @@ body {
 }
 
 .theme-btn,
+.bookmarks-btn,
 .search-btn {
   background: none;
   border: 1px solid rgba(255,255,255,0.2);
@@ -522,6 +523,114 @@ body {
   display: none;
 }
 
+/* --- Bookmarks Overlay --- */
+.bookmarks-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+}
+
+.bookmarks-overlay.hidden {
+  display: none;
+}
+
+.bookmarks-container {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bookmarks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.bookmarks-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+.bookmarks-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.bookmark-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.bookmark-item:hover {
+  background: var(--verse-hover);
+}
+
+.bookmark-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.bookmark-delete {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
+}
+
+.bookmark-delete:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.bookmarks-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* --- Bookmark Star in Nav Row --- */
+.bookmark-star {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius);
+  font-size: 18px;
+  padding: 4px 8px;
+  cursor: pointer;
+  line-height: normal;
+  color: var(--header-text);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.bookmark-star.active {
+  color: #f9a825;
+}
+
 /* --- Responsive --- */
 @media (max-width: 600px) {
   .app-header {
@@ -552,12 +661,18 @@ body {
     width: 42px;
   }
 
+  .bookmark-star {
+    font-size: 16px;
+    padding: 3px 5px;
+  }
+
   .version-btn {
     font-size: 14px;
     padding: 5px 5px;
   }
 
   .theme-btn,
+  .bookmarks-btn,
   .search-btn {
     font-size: 14px;
     padding: 5px 5px;
