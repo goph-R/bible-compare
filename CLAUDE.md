@@ -6,6 +6,7 @@ Offline Bible verse comparison app. Vanilla JS/HTML/CSS, no framework, no build 
 ## Tech Stack
 - Vanilla JS (ES modules), HTML, CSS with custom properties
 - Capacitor.js 6.x for native mobile
+- Android: target/compile SDK 37 (Android 17), minSdk 24, Android Gradle Plugin 8.13.1, Gradle 8.14.3, JDK 21. Current release: 0.9.8 (versionCode 9)
 - Bible data: JSON files from scrollmapper/bible_databases
 
 ## Project Structure
@@ -18,7 +19,7 @@ Offline Bible verse comparison app. Vanilla JS/HTML/CSS, no framework, no build 
 - `sw.js` — Service worker, bump `CACHE_NAME` version when assets change
 - `data/` — Translation JSON files (~11MB each)
 - `www/` — Generated: copy of web files for Capacitor (gitignored)
-- `android/` — Generated: Capacitor Android project (gitignored)
+- `android/` — Capacitor Android project. Tracked in git (versionCode/versionName and SDK config in `android/app/build.gradle` + `android/variables.gradle` are committed). `cap sync` refreshes web assets/plugins but does not overwrite these build files.
 
 ## Key Patterns
 - Adding a translation: drop JSON in `data/`, add entry to `TRANSLATIONS` in `db.js`, add to `sw.js` cache list
@@ -42,6 +43,13 @@ export JAVA_HOME="C:/Program Files/Android/Android Studio/jbr"
 npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
+
+Release bundle for Google Play (signed via `keystore.properties` + `bible-compare.jks`, both gitignored):
+```bash
+cd android && ./gradlew bundleRelease
+# -> android/app/build/outputs/bundle/release/app-release.aab (rename to app-release-<version>.aab)
+```
+Bump `versionCode` and `versionName` in `android/app/build.gradle` before every Play upload, and add a `CHANGELOG.md` entry. `android/local.properties` (gitignored) must point `sdk.dir` at the local SDK; on the Linux box that is `/home/gopher/Android/Sdk` and no `JAVA_HOME` export is needed (system JDK 21).
 
 ### iOS (not yet tested)
 ```bash

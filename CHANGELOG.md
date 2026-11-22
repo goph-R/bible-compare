@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.9.8] - 2026-11-22
+
+### Changed
+- Target Android 17 (API 37), compile SDK 37
+- Minimum Android version raised to 7.0 (minSdk 22 → 24), required by Play automatic protection
+- Android Gradle Plugin 8.2.1 → 8.13.1, Gradle wrapper 8.2.1 → 8.14.3
+
+## [0.9.7] - 2026-07-22
+
+### Changed
+- Target Android 16 (API 36)
+
+## [0.9.6] - 2026-03-16
+
+### Changed
+- Replaced deprecated system bar color APIs with window background
+
+## [0.9.5] - 2026-03-16
+
+### Fixed
+- System bar insets and navigation bar color
+
 ## [0.9.2] - 2026-03-16
 
 ### Fixed
